@@ -23,10 +23,10 @@ def compose(*functions):
 def flow(*functions):
 	return compose(*reversed(functions))
 
-def composedType(*args, **kwargs):
+def record(*args, **kwargs):
 	if len(args) > 0:
-		raise ValueError('composedType do not support positional arguments')
-	T = namedtuple('composedType', kwargs.keys())
+		raise ValueError('record do not support positional arguments')
+	T = namedtuple('record', kwargs.keys())
 	return T(**kwargs)
 
 class Promise():
