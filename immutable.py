@@ -54,7 +54,7 @@ class List:
 		res = []
 		for fun in self.__items:
 			for elem in L:
-			res.append(fun(elem))
+				res.append(fun(elem))
 		return List(res)
 
 	def map(self, fun):
