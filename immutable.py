@@ -50,11 +50,12 @@ class List:
 			res.append(toPython(elem))
 		return res
         
-        def pure(self):
-            pass
-
-        def apply(self):
-            pass
+        def apply(self, L):
+            res = []
+            for fun in self.__items:
+                for elem in L:
+                    res.append(fun(elem))
+            return List(res)
 
         def map(self, fun):
             return List(map(fun, self.__items))
@@ -127,30 +128,8 @@ class Map:
 		return res
 
 if __name__ == '__main__':
-	print(dir(list()))
-	L = List()
-	L = L.append(5).append(6)
-	print(L)
-	print(L[1:])
-
-	print(5 in L)
-
-	#L[0] = 8
-
-	for elem in L:
-		print(elem)
-
-	print(len(L))
-
-	M = Map()
-	M = M.set('truc', 42).set('machin', 3.14)
-	print(M)
-	print(M['truc'])
-
-	print('truc' in M)
-
-	for k in M:
-		print(k)
+    L = List([1, 2, 3])
+    print(L.map(lambda x: x*x))
 
 def append(item):
 	def fun(L: List):
