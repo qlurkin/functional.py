@@ -49,6 +49,24 @@ class List:
 		for elem in self:
 			res.append(toPython(elem))
 		return res
+        
+        def pure(self):
+            pass
+
+        def apply(self):
+            pass
+
+        def map(self, fun):
+            return List(map(fun, self.__items))
+
+        def join(self):
+            res = []
+            for elem in self.__items:
+                res += elem
+            return List(res)
+
+        def bind(self, fun):
+            return self.map(fun).join()
 
 
 class Map:
