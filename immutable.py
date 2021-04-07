@@ -129,7 +129,11 @@ class Map:
 
 if __name__ == '__main__':
 	L = List([1, 2, 3])
-	print(L.map(lambda x: x*x))
+	def add(a):
+		def adda(b):
+			return a + b
+		return adda
+	print(L.map(add).apply([1, 2, 3]))
 
 def append(item):
 	def fun(L: List):
