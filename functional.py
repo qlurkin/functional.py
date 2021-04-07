@@ -23,11 +23,15 @@ def compose(*functions):
 def flow(*functions):
 	return compose(*reversed(functions))
 
-def record(*args, **kwargs):
-	if len(args) > 0:
-		raise ValueError('record do not support positional arguments')
-	T = namedtuple('record', kwargs.keys())
-	return T(**kwargs)
+def data(name, keys):
+    T = namedtuple(name, keys.keys())
+    
+    def constructor(**kwargs):
+        for key, value in keys.items():
+            if not isinstance(kwargs[key], value):
+                raise TypeError('{} should be of type {}'.format(key, value.__name__))
+        return T(**kwargs)
+    return constructor
 
 class Promise():
 	def __init__(self, fun):
@@ -76,14 +80,8 @@ class createStore():
 	pass
 
 if __name__ == '__main__':
-	r = None
-	
-	def f(resolve, reject):
-		global r
-		r = resolve
+    Person = data('Person', {'name': str, 'age': int})
 
-	p = Promise(f)
+    quentin = Person(name='Quentin', age=38)
 
-	p.then(lambda v: 2*v).then(lambda v: print(v))
-
-	r('hello')
+    print(quentin)
