@@ -50,24 +50,24 @@ class List:
 			res.append(toPython(elem))
 		return res
         
-        def apply(self, L):
-            res = []
-            for fun in self.__items:
-                for elem in L:
-                    res.append(fun(elem))
-            return List(res)
+	def apply(self, L):
+		res = []
+		for fun in self.__items:
+			for elem in L:
+			res.append(fun(elem))
+		return List(res)
 
-        def map(self, fun):
-            return List(map(fun, self.__items))
+	def map(self, fun):
+		return List(map(fun, self.__items))
 
-        def join(self):
-            res = []
-            for elem in self.__items:
-                res += elem
-            return List(res)
+	def join(self):
+		res = []
+		for elem in self.__items:
+			res += elem
+		return List(res)
 
-        def bind(self, fun):
-            return self.map(fun).join()
+	def bind(self, fun):
+		return self.map(fun).join()
 
 
 class Map:
