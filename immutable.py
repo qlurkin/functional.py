@@ -128,8 +128,8 @@ class Map:
 		return res
 
 if __name__ == '__main__':
-    L = List([1, 2, 3])
-    print(L.map(lambda x: x*x))
+	L = List([1, 2, 3])
+	print(L.map(lambda x: x*x))
 
 def append(item):
 	def fun(L: List):
