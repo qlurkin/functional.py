@@ -16,18 +16,16 @@ def pluck(key):
 	return pluck
 
 def curry(fun):
-	@wraps(fun)
-	def firstwrapper(*firts):
-		arguments = []
+	def attach(things):
 		@wraps(fun)
-		def wrapper(*args):
-			arguments[len(arguments):] = args
+		def wrapper(*first):
 			try:
-				return fun(*arguments)
+				return fun(*(things + first))
 			except TypeError:
-				return wrapper
-		return wrapper(*firts)
-	return firstwrapper
+				return attach(things + first)
+		return wrapper
+	return attach(tuple())
+		
 
 def compose(*functions):
 	def composed(*args, **kwargs):
@@ -46,7 +44,7 @@ def map(T, fun):
 
 @map.register(tuple)
 def _(T, fun):
-	return tuple(builtinMap(fun, T))
+	return tuple((fun(elem) for elem in T))
 
 @singledispatch
 def flat(T):
@@ -64,6 +62,14 @@ def pure(fun):
 def _(fun):
 	return (fun,)
 	
+@singledispatch
+def apply(TF, T):
+	raise NotImplementedError()
+	
+@apply.register(tuple)
+def _(TF, T):
+	return tuple([fun(elem) for fun in TF for elem in T])
+	
 def bind(T, fun):
 	return flat(map(T, fun))
 	
@@ -76,6 +82,11 @@ if __name__ == '__main__':
 
     print(quentin)
     
+    def add(a):
+    	def add(b):
+    		return a+b
+    	return add
+    	
     @curry
-    def add(a, b):
-    	return a+b
+    def mult(a, b):
+    	return a*b
