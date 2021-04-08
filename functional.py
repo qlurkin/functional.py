@@ -16,15 +16,15 @@ def pluck(key):
 	return pluck
 
 def curry(fun):
-	def attach(things):
+	def partial(firsts):
 		@wraps(fun)
-		def wrapper(*first):
+		def next(*rest):
 			try:
-				return fun(*(things + first))
+				return fun(*(firsts + rest))
 			except TypeError:
-				return attach(things + first)
-		return wrapper
-	return attach(tuple())
+				return partial(firsts + rest)
+		return next
+	return partial(tuple())
 		
 
 def compose(*functions):
