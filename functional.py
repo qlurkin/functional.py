@@ -1,16 +1,33 @@
-from functools import reduce, partial, wraps, lru_cache
+from functools import reduce, partial, wraps, lru_cache, singledispatch
 from collections import namedtuple
+from types import FunctionType
+
+builtinMap = map
 
 def cache(fun):
 	return lru_cache(maxsize=None)(fun)
 
 def pluck(key):
 	def pluck(D):
-		return D[key]
+		if isinstance(D, dict):
+			return D[key]
+		return D.__getattribute__(key)
+	pluck.__name__ = 'pluck_' + key
 	return pluck
 
-def curry():
-	pass
+def curry(fun):
+	@wraps(fun)
+	def firstwrapper(*firts):
+		arguments = []
+		@wraps(fun)
+		def wrapper(*args):
+			arguments[len(arguments):] = args
+			try:
+				return fun(*arguments)
+			except TypeError:
+				return wrapper
+		return wrapper(*firts)
+	return firstwrapper
 
 def compose(*functions):
 	def composed(*args, **kwargs):
@@ -22,66 +39,43 @@ def compose(*functions):
 
 def flow(*functions):
 	return compose(*reversed(functions))
+	
+@singledispatch
+def map(T, fun):
+	raise NotImplementedError()	
 
-def data(name, keys):
-    T = namedtuple(name, keys.keys())
-    
-    def constructor(**kwargs):
-        for key, value in keys.items():
-            if not isinstance(kwargs[key], value):
-                raise TypeError('{} should be of type {}'.format(key, value.__name__))
-        return T(**kwargs)
-    return constructor
+@map.register(tuple)
+def _(T, fun):
+	return tuple(builtinMap(fun, T))
 
-class Promise():
-	def __init__(self, fun):
-		self.__status = 'pending'
-		self.__value = None
-		self.__error = None
-		self.__resolver = None
-		self.__rejecter = None
+@singledispatch
+def flat(T):
+	raise NotImplementedError()
+	
+@flat.register(tuple)
+def _(T):
+	return sum(T, ())
 
-		def resolve(value):
-			if self.__status == 'pending': 
-				self.__value = value
-				self.__status = 'resolved'
-				if self.__resolver is not None:
-					self.__resolver(value)
-
-		def reject(error):
-			if self.__status == 'pending':
-				self.__error = error
-				self.__status = 'rejected'
-				if self.__rejecter is not None:
-					self.__rejecter(error)
-
-		fun(resolve, reject)
-
-	def then(self, fun):
-		def promiseBuilder(resolve, reject):
-			def resolver(value):
-				res = fun(value)
-				if isinstance(res, Promise):
-					res.then(resolve)
-				else:
-					resolve(res)
-			self.__resolver = resolver
-		promise = Promise(promiseBuilder)
-		return promise
-
-	def catch(self, fun):
-		if self.__status != 'rejected':
-			self.__rejecter = fun
-		else:
-			fun(self.__error)
-		#must return a new Promise
-
-class createStore():
-	pass
+@singledispatch
+def pure(fun):
+	raise NotImplementedError()
+	
+@pure.register(FunctionType)
+def _(fun):
+	return (fun,)
+	
+def bind(T, fun):
+	return flat(map(T, fun))
+	
+data = namedtuple
 
 if __name__ == '__main__':
-    Person = data('Person', {'name': str, 'age': int})
+    Person = data('Person', ['name', 'age'])
 
     quentin = Person(name='Quentin', age=38)
 
     print(quentin)
+    
+    @curry
+    def add(a, b):
+    	return a+b
